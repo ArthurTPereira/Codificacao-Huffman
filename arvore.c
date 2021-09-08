@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "arvore.h"
 
 #define TAM 128
@@ -132,7 +133,7 @@ Arv* geraArv(Lista* lista) {
         
         novo = alocaNoArv();
         novo->prox = NULL;
-
+        novo->caracter = '\0';
         novo->frequencia = esq->frequencia + dir->frequencia;
         novo->esq = esq;
         novo->dir = dir;
@@ -159,4 +160,65 @@ Arv* liberaArv(Arv* arv) {
         arv = NULL;
     }
     return NULL;
+}
+
+int retornaAltura(Arv* arv) {
+    if (arv == NULL) {
+        return 0;
+    }
+
+    int esq = retornaAltura(arv->esq);
+    int dir = retornaAltura(arv->dir);
+
+    if (esq > dir) {
+        return esq + 1;
+    } else return dir + 1;
+}
+
+char** alocaDicionario(int col) {
+    char** dic = (char**) malloc(TAM * sizeof(char*));
+    if (dic == NULL) {
+        perror("Erro");
+        exit(1);
+    }
+
+    for (int i = 0; i < TAM; i++) {
+        dic[i] = calloc(col,sizeof(char));
+    }
+    
+    return dic;
+}
+
+void criaDicionario(char** dic, Arv* arv, char* codigo, int col) {
+    char esq[col];
+    char dir[col];
+    
+    if (arv->esq == NULL && arv->dir == NULL) {
+        strcpy(dic[arv->caracter],codigo);
+    } else {
+        strcpy(esq,codigo);
+        strcpy(dir,codigo);
+        strcat(esq,"0");
+        strcat(dir,"1");
+
+        criaDicionario(dic,arv->esq,esq,col);
+        criaDicionario(dic,arv->dir,dir,col);
+    }
+}
+
+void imprimeDicionario(char** dic) {
+    for (int i = 0; i < TAM; i++) {
+        if (i >= 32 && i <= 126 && *dic[i] != '\0') {
+            printf("%c: %s\n",i,dic[i]);
+        }
+    }
+}
+
+void liberaDicionario(char** dic) {
+    for (int i = 0; i < TAM; i++) {
+        free(dic[i]);
+        dic[i] = NULL;
+    }
+    free(dic);
+    dic = NULL;
 }

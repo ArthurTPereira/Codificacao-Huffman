@@ -33,11 +33,15 @@ int main() {
     
     //imprimeArv(huffman);
 
-
+    char** dic = alocaDicionario(retornaAltura(huffman));
+    criaDicionario(dic,huffman,"",retornaAltura(huffman));
+    
+    imprimeDicionario(dic);
 
     liberaArv(huffman);
     liberaLista(lista);
     liberaTabela(vet);
-
+    liberaDicionario(dic);
+    
     return 0;
 }

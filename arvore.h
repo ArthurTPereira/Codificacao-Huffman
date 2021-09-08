@@ -21,5 +21,14 @@ void imprimeArv(Arv* arv); // Função temporária
 
 Arv* liberaArv(Arv* arv);
 
+int retornaAltura(Arv* arv);
+
+char** alocaDicionario(int col);
+
+void criaDicionario(char** dic, Arv* arv, char* codigo, int col);
+
+void imprimeDicionario(char** dic); // Função temporária
+
+void liberaDicionario(char** dic);
 
 #endif // ARVORE_H
