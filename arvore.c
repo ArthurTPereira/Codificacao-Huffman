@@ -3,6 +3,7 @@
 #include <string.h>
 #include "arvore.h"
 #include "bitmap.h"
+#include "frequencia.h"
 
 #define TAM 256
 
@@ -207,9 +208,9 @@ void criaDicionario(char** dic, Arv* arv, char* codigo, int altura) {
 
 void imprimeDicionario(char** dic) {
     for (int i = 0; i < TAM; i++) {
-        if (*dic[i] != '\0') {
+        //if (*dic[i] != '\0') {
             printf("%c: %s\n",i,dic[i]);
-        }
+        //}
     }
 }
 
@@ -236,6 +237,7 @@ static bitmap* recriaBitmap(FILE* destino, bitmap* bm) {
         }
         bitmapLibera(bm);
         bm = bitmapInit(80000000);
+        printf("Bitmap recriado\n");
         return bm;
 }
 
@@ -255,12 +257,6 @@ static void escreve(FILE* destino,bitmap* bm, unsigned char bit) {
     }
 }
 
-void escreveTabelaFrequencia(FILE* destino, int* tabela) {
-    for (int i = 0; i < TAM; i++) {
-        fwrite(&tabela[i],sizeof(int),1,destino);
-    }
-}
-
 void compacta(char** dicionario, FILE* origem, char* filename, int* tabela) {
     char nome[100];
     strcpy(nome,filename);
@@ -272,8 +268,6 @@ void compacta(char** dicionario, FILE* origem, char* filename, int* tabela) {
         perror("Erro");
     }
     escreveTabelaFrequencia(comp,tabela);
-    fclose(comp);
-    return;
 
     fseek(origem,0,SEEK_SET);
     fseek(origem,0,SEEK_END);
@@ -323,19 +317,37 @@ void compacta(char** dicionario, FILE* origem, char* filename, int* tabela) {
     fclose(comp);
 }
 
-void descompacta(char* filename) {
-    FILE* descompactado = fopen(filename,"rb");
-    if (descompactado == NULL) {
+static unsigned int verificaBitUm(unsigned char byte, int i) {
+    unsigned char mascara = (1 << i);
+    return byte & mascara;
+}
+
+void descompacta(FILE* arquivo, Arv* huffman, char* filename) {
+    unsigned char c;
+    Arv* no = huffman;
+
+    char nome[100];
+    strcpy(nome,filename);
+    strtok(nome,".");
+    strcat(nome,"2.txt");
+    FILE* novo = fopen(nome,"wb");
+    if (novo == NULL) {
         perror("Erro");
     }
-    int i =0;
-    unsigned char c;
-    bitmap* bm = bitmapInit(10000);
-    while (fread(&c,sizeof(unsigned char),1,descompactado)) {
-        bitmapAppendLeastSignificantBit(bm,c);
-        printf("%0x",bitmapGetContents(bm)[i]);
-        i++;
-    }
 
-    fclose(descompactado);
+    while (fread(&c,sizeof(unsigned char),1,arquivo)) {
+        for (int i = 7; i >= 0; i--) {
+            if (verificaBitUm(c,i)) {
+                no = no->dir;
+            } else {
+                no = no->esq;
+            }
+
+            if (no->esq == NULL && no->dir == NULL) {
+                fwrite(&no->caracter,sizeof(unsigned char),1,novo);
+                no = huffman;
+            }
+        }
+    }
+    fclose(novo);
 }

@@ -2,7 +2,6 @@
 #include "frequencia.h"
 #include "arvore.h"
 
-
 int main(int argc, char* argv[]) {
 
     FILE* txt = fopen(argv[1],"rb");
@@ -11,7 +10,6 @@ int main(int argc, char* argv[]) {
     }
 
     int* vet = preencheFrequencia(txt);
-    imprimeTabelaFrequencia(vet);
     Lista* lista = inicLista();
     preencheLista(lista,vet);
 
@@ -20,14 +18,7 @@ int main(int argc, char* argv[]) {
     char** dicionario = alocaDicionario(retornaAltura(huffman));
     criaDicionario(dicionario,huffman,"",retornaAltura(huffman));
 
-
     compacta(dicionario,txt,argv[1],vet);
-    int vet2[256];
-    FILE* f = fopen("cat.comp","rb");
-    fread(vet2,sizeof(int),256,f);
-    printf("segunda tabela:\n");
-    imprimeTabelaFrequencia(vet2);
-    fclose(f);
 
     fclose(txt);
     liberaArv(huffman);

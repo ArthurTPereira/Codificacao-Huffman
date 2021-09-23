@@ -19,4 +19,6 @@ void imprimeTabelaFrequencia(int* vet); // Função temporária
  */
 void liberaTabela(int* vet);
 
+void escreveTabelaFrequencia(FILE* destino, int* tabela);
+
 #endif // FREQUENCIA_H

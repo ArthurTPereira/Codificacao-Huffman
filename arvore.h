@@ -95,6 +95,6 @@ void liberaDicionario(char** dic);
 
 void compacta(char** dicionario, FILE* origem, char* filename, int* tabela);
 
-void descompacta(char* filename);
+void descompacta(FILE* arquivo, Arv* huffman, char* filename);
 
 #endif // ARVORE_H

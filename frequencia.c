@@ -39,12 +39,18 @@ int* preencheFrequencia(FILE* arquivo) {
 
 void imprimeTabelaFrequencia(int* vet) {
     for (int i = 0; i < TAM; i++) {
-        if (vet[i] != 0) {
+        //if (vet[i] != 0) {
             printf("%d\n",vet[i]);
-        }
+        //}
     }
 }
 
 void liberaTabela(int* vet) {
     free(vet);
+}
+
+void escreveTabelaFrequencia(FILE* destino, int* tabela) {
+    for (int i = 0; i < TAM; i++) {
+        fwrite(&tabela[i],sizeof(int),1,destino);
+    }
 }
