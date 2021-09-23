@@ -2,11 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include "arvore.h"
+#include "bitmap.h"
 
-#define TAM 128
+#define TAM 256
 
 struct arv {
-    char caracter;
+    unsigned char caracter;
     int frequencia;
     Arv* esq;
     Arv* dir;
@@ -18,7 +19,7 @@ struct lista {
     Arv* ult;
 };
 
-Arv* alocaNoArv() {
+static Arv* alocaNoArv() {
     Arv* no = (Arv*) malloc(sizeof(Arv));
     if (no == NULL) {
         perror("Erro");
@@ -26,7 +27,6 @@ Arv* alocaNoArv() {
     }
 
     return no;
-    
 }
 
 Arv* inicNoArv() {
@@ -39,7 +39,7 @@ Arv* inicNoArv() {
     return no;
 }
 
-Lista* alocaLista() {
+static Lista* alocaLista() {
     Lista* lista = (Lista*) malloc(sizeof(Lista));
     if (lista == NULL) {
         perror("Erro");
@@ -89,7 +89,7 @@ void insereOrdenadoLista(Lista* lista, Arv* no) {
 void preencheLista(Lista* lista, int* vet) {
     Arv* no;
     for (int i = 0; i < TAM; i++) {
-        if (vet[i] != 0 && i >= 32 && i <= 126) {
+        if (vet[i] != 0) {
             no = inicNoArv();
             no->caracter = (char)i;
             no->frequencia = vet[i];
@@ -110,7 +110,7 @@ void liberaLista(Lista* lista) {
     free(lista);
 }
 
-Arv* removePrimElemento(Lista* lista) {
+static Arv* removePrimElemento(Lista* lista) {
     Arv* p = NULL;
 
     if (lista->prim != NULL) {
@@ -152,14 +152,13 @@ void imprimeArv(Arv* arv) {
     }
 }
 
-Arv* liberaArv(Arv* arv) {
+void liberaArv(Arv* arv) {
     if (arv != NULL) {
         liberaArv(arv->esq);
         liberaArv(arv->dir);
         free(arv);
         arv = NULL;
     }
-    return NULL;
 }
 
 int retornaAltura(Arv* arv) {
@@ -189,9 +188,9 @@ char** alocaDicionario(int col) {
     return dic;
 }
 
-void criaDicionario(char** dic, Arv* arv, char* codigo, int col) {
-    char esq[col];
-    char dir[col];
+void criaDicionario(char** dic, Arv* arv, char* codigo, int altura) {
+    char esq[altura]; //Tamanho máximo do código = altura da árvore
+    char dir[altura];
     
     if (arv->esq == NULL && arv->dir == NULL) {
         strcpy(dic[arv->caracter],codigo);
@@ -201,14 +200,14 @@ void criaDicionario(char** dic, Arv* arv, char* codigo, int col) {
         strcat(esq,"0");
         strcat(dir,"1");
 
-        criaDicionario(dic,arv->esq,esq,col);
-        criaDicionario(dic,arv->dir,dir,col);
+        criaDicionario(dic,arv->esq,esq,altura);
+        criaDicionario(dic,arv->dir,dir,altura);
     }
 }
 
 void imprimeDicionario(char** dic) {
     for (int i = 0; i < TAM; i++) {
-        if (i >= 32 && i <= 126 && *dic[i] != '\0') {
+        if (*dic[i] != '\0') {
             printf("%c: %s\n",i,dic[i]);
         }
     }
@@ -221,4 +220,122 @@ void liberaDicionario(char** dic) {
     }
     free(dic);
     dic = NULL;
+}
+
+static int verificaTamanho(bitmap* bm) {
+    if (bitmapGetLength(bm) == bitmapGetMaxSize(bm)) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+static bitmap* recriaBitmap(FILE* destino, bitmap* bm) {
+        for (int i = 0; i < bitmapGetLength(bm)/8; i++) {
+            fwrite(&bitmapGetContents(bm)[i],sizeof(unsigned char),1,destino);
+        }
+        bitmapLibera(bm);
+        bm = bitmapInit(80000000);
+        return bm;
+}
+
+static void escreve(FILE* destino,bitmap* bm, unsigned char bit) {
+    if (verificaTamanho(bm) == 1) {
+        bm = recriaBitmap(destino,bm);
+    } else if (bit == 1) {
+        bitmapAppendLeastSignificantBit(bm,1);
+        if (verificaTamanho(bm) == 1) {
+            bm = recriaBitmap(destino,bm);
+        }
+    } else {
+        bitmapAppendLeastSignificantBit(bm,0);
+        if (verificaTamanho(bm) == 1) {
+            bm = recriaBitmap(destino,bm);
+        }
+    }
+}
+
+void escreveTabelaFrequencia(FILE* destino, int* tabela) {
+    for (int i = 0; i < TAM; i++) {
+        fwrite(&tabela[i],sizeof(int),1,destino);
+    }
+}
+
+void compacta(char** dicionario, FILE* origem, char* filename, int* tabela) {
+    char nome[100];
+    strcpy(nome,filename);
+    strtok(nome,".");
+    strcat(nome,".comp");
+
+    FILE* comp = fopen(nome,"ab");
+    if (comp == NULL) {
+        perror("Erro");
+    }
+    escreveTabelaFrequencia(comp,tabela);
+    fclose(comp);
+    return;
+
+    fseek(origem,0,SEEK_SET);
+    fseek(origem,0,SEEK_END);
+    unsigned long filelen = ftell(origem);
+    fseek(origem,0,SEEK_SET);
+    unsigned char* buffer = (char*) malloc(filelen);
+
+    fread(buffer,filelen,sizeof(unsigned char),origem);
+
+    char codigo[100];
+    strcpy(codigo,"");
+
+    int i = 0;
+    int j = 0;
+
+    bitmap* bm = bitmapInit(80000000); //8kk bits == 1MB
+
+    while (i < filelen) {
+        j = 0;
+        strcpy(codigo,dicionario[(unsigned char)buffer[i]]);
+        while (codigo[j] != '\0') {
+            if (codigo[j] == '1') {
+                escreve(comp,bm,1);
+            } else if (codigo[j] == '0') {
+                escreve(comp,bm,0);
+            }
+            j++;
+        }
+        i++;
+    }
+
+    int n;
+
+    if (bitmapGetLength(bm) % 8 != 0) {
+        n = 8 - (bitmapGetLength(bm) % 8);
+        for (i = 0 ; i < n; i++) {
+            bitmapAppendLeastSignificantBit(bm,0);
+        }
+    }
+    
+    for (i = 0; i < bitmapGetLength(bm)/8; i++) {
+        fwrite(&bitmapGetContents(bm)[i],sizeof(unsigned char),1,comp);
+    }
+    
+    free(buffer);
+    bitmapLibera(bm);
+    fclose(comp);
+}
+
+void descompacta(char* filename) {
+    FILE* descompactado = fopen(filename,"rb");
+    if (descompactado == NULL) {
+        perror("Erro");
+    }
+    int i =0;
+    unsigned char c;
+    bitmap* bm = bitmapInit(10000);
+    while (fread(&c,sizeof(unsigned char),1,descompactado)) {
+        bitmapAppendLeastSignificantBit(bm,c);
+        printf("%0x",bitmapGetContents(bm)[i]);
+        i++;
+    }
+
+    fclose(descompactado);
 }
