@@ -88,13 +88,25 @@ void imprimeDicionario(char** dic); // Função temporária
 /* Libera a memória alocada de um dicionário
  * Input: Ponteiro para o dicionário
  * Output: Nenhum
- * Pré-condição: O dicionário existe e está alocadp
- * Pós-condição: A memória foi corretamente liberadasss
+ * Pré-condição: O dicionário existe e está alocado
+ * Pós-condição: A memória foi corretamente liberada
  */
 void liberaDicionario(char** dic);
 
+/* Compacta um arquivo
+ * Input: Ponteiro para o dicionário, o arquivo a ser compactado, o nome do arquivo e a tabela de frequência
+ * Output: Nenhum
+ * Pré-condição: O dicionário, o arquivo, o nome e a tabela existem e estão corretamente alocados e criados
+ * Pós-condição: O arquivo compactado é criado, e nada mais é alterado.
+ */
 void compacta(char** dicionario, FILE* origem, char* filename, int* tabela);
 
+/* Descompacta um arquivo
+ * Input: Ponteiro para o arquivo a ser descompactado, a árvore de huffman e o nome do arquivo
+ * Output: Nenhum
+ * Pré-condição: O arquivo, a árvore e o nome existem e estão corretamente alocados e criados
+ * Pós-condição: O arquivo foi descompactado, e nada mais é alterado
+ */
 void descompacta(FILE* arquivo, Arv* huffman, char* filename);
 
 #endif // ARVORE_H

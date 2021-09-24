@@ -8,7 +8,7 @@ int main(int argc, char* argv[]) {
         perror("Erro");
     }
 
-    int frequencia[256];
+    int frequencia[257];
     fread(frequencia,sizeof(int),257,compactado);
     Lista* lista = inicLista();
     preencheLista(lista,frequencia);

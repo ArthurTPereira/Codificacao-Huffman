@@ -19,6 +19,12 @@ void imprimeTabelaFrequencia(int* vet); // Função temporária
  */
 void liberaTabela(int* vet);
 
+/* Escreve a tabela de frequência em um arquivo
+ * Input: Ponteiro para o arquivo aberto e a tabela de frequência
+ * Output: Nenhum
+ * Pré-condição: O arquivo e a tabela existem e estão corretamente alocados
+ * Pós-condição: A tabela foi escrita no arquivo corretamente
+ */
 void escreveTabelaFrequencia(FILE* destino, int* tabela);
 
 #endif // FREQUENCIA_H

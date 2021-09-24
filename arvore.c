@@ -21,6 +21,12 @@ struct lista {
     Arv* ult;
 };
 
+/* Aloca a memória para um nó de uma árvore
+ * Input: Nenhum
+ * Output: Ponteiro para o nó alocado
+ * Pré-condição: Nenhum
+ * Pós-condição: A memória foi corretamente alocada
+ */
 static Arv* alocaNoArv() {
     Arv* no = (Arv*) malloc(sizeof(Arv));
     if (no == NULL) {
@@ -41,6 +47,12 @@ Arv* inicNoArv() {
     return no;
 }
 
+/* Aloca a memória para uma lista encadeada
+ * Input: Nenhum
+ * Output: Ponteiro para a lista encadeada alocada
+ * Pré-condição: Nenhum
+ * Pós-condição: A memória foi corretamente alocada
+ */
 static Lista* alocaLista() {
     Lista* lista = (Lista*) malloc(sizeof(Lista));
     if (lista == NULL) {
@@ -100,7 +112,6 @@ void preencheLista(Lista* lista, int* vet) {
                 no->caracter = '\0';
                 no->eof = 1;
             }
-            
 
             insereOrdenadoLista(lista,no);
         }
@@ -234,6 +245,12 @@ void liberaDicionario(char** dic) {
     dic = NULL;
 }
 
+/* Verifica se o bitmap está com tamanho cheio
+ * Input: Ponteiro para o bitmap
+ * Output: Booleano: 1 se estiver cheio, 0 se estiver vazio
+ * Pré-condição: O bitmap existe e está corretamente alocado
+ * Pós-condição: Nenhum
+ */
 static int verificaTamanho(bitmap* bm) {
     if (bitmapGetLength(bm) == bitmapGetMaxSize(bm)) {
         return 1;
@@ -242,6 +259,12 @@ static int verificaTamanho(bitmap* bm) {
     }
 }
 
+/* Escreve todo o bitmap em um arquivo e realoca a sua memória
+ * Input: Ponteiro para o arquivo a ser escrito e ponteiro para o bitmap
+ * Output: Ponteiro para o bitmap realocado
+ * Pré-condição: O bitmap e o arquivo existem e estão corretamente alocados
+ * Pós-condição: A memória do bitmap é realocada, e o arquivo permanece aberto
+ */
 static bitmap* recriaBitmap(FILE* destino, bitmap* bm) {
         for (int i = 0; i < bitmapGetLength(bm)/8; i++) {
             fwrite(&bitmapGetContents(bm)[i],sizeof(unsigned char),1,destino);
@@ -252,6 +275,12 @@ static bitmap* recriaBitmap(FILE* destino, bitmap* bm) {
         return bm;
 }
 
+/* Escreve um bit em um arquivo
+ * Input: Ponteiro para o arquivo, para o bitmap e um bit
+ * Output: Nenhum
+ * Pré-condição: O arquivo e o bitmap existem e estão corretamente alocados, e o bit é válido
+ * Pós-condição: Nenhum
+ */
 static void escreve(FILE* destino,bitmap* bm, unsigned char bit) {
     if (verificaTamanho(bm) == 1) {
         bm = recriaBitmap(destino,bm);
