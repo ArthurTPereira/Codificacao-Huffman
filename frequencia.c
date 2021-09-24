@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "frequencia.h"
 
-#define TAM 256
+#define TAM 257
 
 static int* alocaTabelaFrequencia() {
     int* vet = (int*) malloc(sizeof(int) * TAM);
@@ -33,6 +33,7 @@ int* preencheFrequencia(FILE* arquivo) {
         vet[(unsigned char)buffer[i]]++;
         i++;
     }
+    vet[256]++;
     free(buffer);
     return vet;
 }
@@ -40,7 +41,7 @@ int* preencheFrequencia(FILE* arquivo) {
 void imprimeTabelaFrequencia(int* vet) {
     for (int i = 0; i < TAM; i++) {
         //if (vet[i] != 0) {
-            printf("%d\n",vet[i]);
+            printf("% i - %d\n",i,vet[i]);
         //}
     }
 }

@@ -5,11 +5,12 @@
 #include "bitmap.h"
 #include "frequencia.h"
 
-#define TAM 256
+#define TAM 257
 
 struct arv {
     unsigned char caracter;
     int frequencia;
+    int eof;
     Arv* esq;
     Arv* dir;
     Arv* prox;
@@ -94,6 +95,12 @@ void preencheLista(Lista* lista, int* vet) {
             no = inicNoArv();
             no->caracter = (char)i;
             no->frequencia = vet[i];
+            no->eof = 0;
+            if (i == 256) {
+                no->caracter = '\0';
+                no->eof = 1;
+            }
+            
 
             insereOrdenadoLista(lista,no);
         }
@@ -194,7 +201,11 @@ void criaDicionario(char** dic, Arv* arv, char* codigo, int altura) {
     char dir[altura];
     
     if (arv->esq == NULL && arv->dir == NULL) {
-        strcpy(dic[arv->caracter],codigo);
+        if (arv->eof == 1) {
+            strcpy(dic[256],codigo);
+        } else {
+            strcpy(dic[arv->caracter],codigo);
+        }
     } else {
         strcpy(esq,codigo);
         strcpy(dir,codigo);
@@ -209,7 +220,7 @@ void criaDicionario(char** dic, Arv* arv, char* codigo, int altura) {
 void imprimeDicionario(char** dic) {
     for (int i = 0; i < TAM; i++) {
         //if (*dic[i] != '\0') {
-            printf("%c: %s\n",i,dic[i]);
+            printf("%d - %s\n",i,dic[i]);
         //}
     }
 }
@@ -300,12 +311,21 @@ void compacta(char** dicionario, FILE* origem, char* filename, int* tabela) {
     }
 
     int n;
+    j = 0;
+    while (dicionario[256][j] != '\0') {
+        if (dicionario[256][j] == '1') {
+            escreve(comp,bm,1);
+        } else if (dicionario[256][j] == '0') {
+            escreve(comp,bm,0);
+        }
+        j++;
+    }
 
     if (bitmapGetLength(bm) % 8 != 0) {
         n = 8 - (bitmapGetLength(bm) % 8);
         for (i = 0 ; i < n; i++) {
             bitmapAppendLeastSignificantBit(bm,0);
-        }
+        }        
     }
     
     for (i = 0; i < bitmapGetLength(bm)/8; i++) {
@@ -344,6 +364,11 @@ void descompacta(FILE* arquivo, Arv* huffman, char* filename) {
             }
 
             if (no->esq == NULL && no->dir == NULL) {
+                if (no->eof == 1) {
+                    fclose(novo);
+                    return;
+                }
+                
                 fwrite(&no->caracter,sizeof(unsigned char),1,novo);
                 no = huffman;
             }
