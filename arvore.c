@@ -298,15 +298,23 @@ static void escreve(FILE* destino,bitmap* bm, unsigned char bit) {
 }
 
 void compacta(char** dicionario, FILE* origem, char* filename, int* tabela) {
+    char temp[100];
     char nome[100];
-    strcpy(nome,filename);
-    strtok(nome,".");
+    unsigned char ext[10];
+    strcpy(temp,filename);
+    char* pt = strtok(temp,".");
+    strcpy(nome,pt);
+    pt = strtok(NULL,".");
+    strcpy(ext,pt);
     strcat(nome,".comp");
+    int k = (int)strlen(ext);
 
-    FILE* comp = fopen(nome,"ab");
+    FILE* comp = fopen(nome,"wb");
     if (comp == NULL) {
         perror("Erro");
     }
+    fwrite(&k,sizeof(int),1,comp);
+    fwrite(&ext,sizeof(char),k,comp);
     escreveTabelaFrequencia(comp,tabela);
 
     fseek(origem,0,SEEK_SET);
@@ -371,14 +379,16 @@ static unsigned int verificaBitUm(unsigned char byte, int i) {
     return byte & mascara;
 }
 
-void descompacta(FILE* arquivo, Arv* huffman, char* filename) {
+void descompacta(FILE* arquivo, Arv* huffman, char* filename, char* extensao) {
     unsigned char c;
     Arv* no = huffman;
-
+    char temp[100];
     char nome[100];
-    strcpy(nome,filename);
-    strtok(nome,".");
-    strcat(nome,"2.txt");
+    strcpy(temp,filename);
+    strtok(temp,".");
+    strcpy(nome,temp);
+    strcat(nome,".");
+    strcat(nome,extensao);
     FILE* novo = fopen(nome,"wb");
     if (novo == NULL) {
         perror("Erro");

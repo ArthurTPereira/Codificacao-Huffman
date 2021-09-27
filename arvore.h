@@ -102,11 +102,11 @@ void liberaDicionario(char** dic);
 void compacta(char** dicionario, FILE* origem, char* filename, int* tabela);
 
 /* Descompacta um arquivo
- * Input: Ponteiro para o arquivo a ser descompactado, a árvore de huffman e o nome do arquivo
+ * Input: Ponteiro para o arquivo a ser descompactado, a árvore de huffman,o nome do arquivo e a extensao
  * Output: Nenhum
  * Pré-condição: O arquivo, a árvore e o nome existem e estão corretamente alocados e criados
  * Pós-condição: O arquivo foi descompactado, e nada mais é alterado
  */
-void descompacta(FILE* arquivo, Arv* huffman, char* filename);
+void descompacta(FILE* arquivo, Arv* huffman, char* filename, char* extensao);
 
 #endif // ARVORE_H
