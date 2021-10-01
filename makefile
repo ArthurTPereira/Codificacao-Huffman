@@ -15,8 +15,8 @@ CC_FLAGS=-c
 all: $(PROJ_NAME)
 
 $(PROJ_NAME): $(OBJ)
-	$(CC) arvore.c bitmap.c Compactador.c frequencia.c -o Compacta
-	$(CC) arvore.c bitmap.c Descompactador.c frequencia.c -o Descompacta
+	$(CC) operacoes.c dicionario.c arvore.c bitmap.c Compactador.c frequencia.c -o Compacta
+	$(CC) operacoes.c dicionario.c arvore.c bitmap.c Descompactador.c frequencia.c -o Descompacta
 	rm -rf *.o
 
 clean:

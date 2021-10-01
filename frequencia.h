@@ -3,13 +3,11 @@
 
 /* Preenche uma tabela de frequência
  * Input: Ponteiro para o arquivo
- * Output: Tabela de frequência
+ * Output: Tabela de frequência preenchida
  * Pré-condição: O arquivo existe e foi corretamente aberto
  * Pós-condição: A tabela foi corretamente gerada
  */
 int* preencheFrequencia(FILE* arquivo);
-
-void imprimeTabelaFrequencia(int* vet); // Função temporária
 
 /* Libera a tabela de frequência
  * Input: Ponteiro para a tabela de frequência

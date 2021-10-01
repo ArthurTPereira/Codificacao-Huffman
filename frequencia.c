@@ -2,8 +2,15 @@
 #include <stdlib.h>
 #include "frequencia.h"
 
+//Definição da quantidade de caracteres ASCII
 #define TAM 257
 
+/* Aloca a memória necessária para a tabela de frequência
+ * Input: Nenhum
+ * Output: Tabela de frequência alocada
+ * Pré-condição: O arquivo existe e foi corretamente aberto
+ * Pós-condição: A tabela foi corretamente gerada
+ */
 static int* alocaTabelaFrequencia() {
     int* vet = (int*) malloc(sizeof(int) * TAM);
     if (vet == NULL) {
@@ -36,14 +43,6 @@ int* preencheFrequencia(FILE* arquivo) {
     vet[256]++;
     free(buffer);
     return vet;
-}
-
-void imprimeTabelaFrequencia(int* vet) {
-    for (int i = 0; i < TAM; i++) {
-        //if (vet[i] != 0) {
-            printf("% i - %d\n",i,vet[i]);
-        //}
-    }
 }
 
 void liberaTabela(int* vet) {

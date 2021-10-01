@@ -31,8 +31,6 @@ Lista* inicLista();
  */
 void preencheLista(Lista* lista, int* vet);
 
-void imprimeLista(Lista* lista); // Função temporária
-
 /* Libera a memória alocada de uma lista encadeada
  * Input: Ponteiro para a lista encadeada
  * Output: Nenhum
@@ -48,8 +46,6 @@ void liberaLista(Lista* lista);
  * Pós-condição: A árvore foi corretamente gerada, e a lista encadeada possui apenas a posição da raiz da árvore
  */
 Arv* geraArv(Lista* lista);
-
-void imprimeArv(Arv* arv); // Função temporária
 
 /* Libera a memória alocada de uma árvore
  * Input: Ponteiro para a raiz de uma árvore
@@ -67,46 +63,44 @@ void liberaArv(Arv* arv);
  */
 int retornaAltura(Arv* arv);
 
-/* Faz a alocação de um dicionário
- * Input: Número de colunas do dicionário
- * Output: Ponteiro para o dicionário
- * Pré-condição: Nenhum
- * Pós-condição: A memória foi corretamente alocada
+/* Retorna o nó esquerdo de um nó de árvore
+ * Input: Ponteiro para um nó
+ * Output: Ponteiro para o nó esquerdo
+ * Pré-condição: A árvore existe e está corretamente alocada
+ * Pós-condição: A árvore permanece inalterada
  */
-char** alocaDicionario(int col);
+Arv* retornaArvEsq(Arv* arv);
 
-/* Preenche o dicionário com os códigos de cada posição
- * Input: Ponteiro para o dicionário, ponteiro para a árvore de Huffman, ponteiro para o código da posição e a altura da árvore
- * Output: Nenhum
- * Pré-condição: O dicionário e a árvore existem e estão corretamente alocados
- * Pós-condição: O dicionário foi preenchido corretamente
+/* Retorna o nó direito de um nó de árvore
+ * Input: Ponteiro para um nó
+ * Output: Ponteiro para o nó direito
+ * Pré-condição: A árvore existe e está corretamente alocada
+ * Pós-condição: A árvore permanece inalterada
  */
-void criaDicionario(char** dic, Arv* arv, char* codigo, int altura);
+Arv* retornaArvDir(Arv* arv);
 
-void imprimeDicionario(char** dic); // Função temporária
-
-/* Libera a memória alocada de um dicionário
- * Input: Ponteiro para o dicionário
- * Output: Nenhum
- * Pré-condição: O dicionário existe e está alocado
- * Pós-condição: A memória foi corretamente liberada
+/* Retorna o caractere de um nó de árvore
+ * Input: Ponteiro para um nó
+ * Output: Caractere do nó
+ * Pré-condição: A árvore existe e está corretamente alocada
+ * Pós-condição: A árvore permanece inalterada
  */
-void liberaDicionario(char** dic);
+unsigned char retornaArvCaracter(Arv* arv);
 
-/* Compacta um arquivo
- * Input: Ponteiro para o dicionário, o arquivo a ser compactado, o nome do arquivo e a tabela de frequência
- * Output: Nenhum
- * Pré-condição: O dicionário, o arquivo, o nome e a tabela existem e estão corretamente alocados e criados
- * Pós-condição: O arquivo compactado é criado, e nada mais é alterado.
+/* Retorna o parâmetro EOF de um nó de árvore
+ * Input: Ponteiro para um nó
+ * Output: Parâmetro EOF
+ * Pré-condição: A árvore existe e está corretamente alocada
+ * Pós-condição: A árvore permanece inalterada
  */
-void compacta(char** dicionario, FILE* origem, char* filename, int* tabela);
+int retornaArvEOF(Arv* arv);
 
-/* Descompacta um arquivo
- * Input: Ponteiro para o arquivo a ser descompactado, a árvore de huffman,o nome do arquivo e a extensao
- * Output: Nenhum
- * Pré-condição: O arquivo, a árvore e o nome existem e estão corretamente alocados e criados
- * Pós-condição: O arquivo foi descompactado, e nada mais é alterado
+/* Retorna a frequência de um nó de árvore
+ * Input: Ponteiro para um nó
+ * Output: Frequência do nó
+ * Pré-condição: A árvore existe e está corretamente alocada
+ * Pós-condição: A árvore permanece inalterada
  */
-void descompacta(FILE* arquivo, Arv* huffman, char* filename, char* extensao);
+int retornaArvFreq(Arv* arv);
 
 #endif // ARVORE_H

@@ -4,7 +4,9 @@
 #include "arvore.h"
 #include "bitmap.h"
 #include "frequencia.h"
+#include "dicionario.h"
 
+//Definição da quantidade de caracteres ASCII
 #define TAM 257
 
 struct arv {
@@ -103,32 +105,31 @@ void insereOrdenadoLista(Lista* lista, Arv* no) {
 void preencheLista(Lista* lista, int* vet) {
     Arv* no;
     for (int i = 0; i < TAM; i++) {
-        if (vet[i] != 0) {
+        if (vet[i] > 0) { // Adiciona somente os que possuem frequencia maior que zero
             no = inicNoArv();
             no->caracter = (char)i;
             no->frequencia = vet[i];
             no->eof = 0;
-            if (i == 256) {
+            if (i == 256) { // Caso seja o caractere que representa o fim do arquivo
                 no->caracter = '\0';
                 no->eof = 1;
             }
 
-            insereOrdenadoLista(lista,no);
+            insereOrdenadoLista(lista,no); // Insere o novo nó na lista
         }
     }
 }
 
-void imprimeLista(Lista* lista) {
-    Arv* p;
-    for (p = lista->prim; p != NULL; p = p->prox) {
-        printf("%c - %d\n",p->caracter,p->frequencia);
-    }
-}
-
 void liberaLista(Lista* lista) {
-    free(lista);
+    free(lista); // Basta liberar a sentinela da lista
 }
 
+/* Remove o primeiro elemento da lista encadeada
+ * Input: Ponteiro para a lista encadeada
+ * Output: Ponteiro para o primeiro elemento da lista removido
+ * Pré-condição: A lista existe e está corretamente alocada
+ * Pós-condição: Somente o primeiro elemento foi removido, e a lista não foi quebrada
+ */
 static Arv* removePrimElemento(Lista* lista) {
     Arv* p = NULL;
 
@@ -147,9 +148,11 @@ Arv* geraArv(Lista* lista) {
     Arv* novo;
 
     while (lista->prim != NULL && lista->prim->prox != NULL) {
+        //Remove os dois primeiros elementos da lista
         esq = removePrimElemento(lista);
         dir = removePrimElemento(lista);
         
+        //Cria um novo nó, atribui a esquerda e direita e insere novamente na lista
         novo = alocaNoArv();
         novo->prox = NULL;
         novo->caracter = '\0';
@@ -161,14 +164,6 @@ Arv* geraArv(Lista* lista) {
     }
     lista->ult = lista->prim;
     return lista->prim;
-}
-
-void imprimeArv(Arv* arv) {
-    if (arv != NULL) {
-        printf("Folha: %c Frequencia: %d\n",arv->caracter,arv->frequencia);
-        imprimeArv(arv->esq);
-        imprimeArv(arv->dir);
-    }
 }
 
 void liberaArv(Arv* arv) {
@@ -193,225 +188,22 @@ int retornaAltura(Arv* arv) {
     } else return dir + 1;
 }
 
-char** alocaDicionario(int col) {
-    char** dic = (char**) malloc(TAM * sizeof(char*));
-    if (dic == NULL) {
-        perror("Erro");
-        exit(1);
-    }
-
-    for (int i = 0; i < TAM; i++) {
-        dic[i] = calloc(col,sizeof(char));
-    }
-    
-    return dic;
+Arv* retornaArvEsq(Arv* arv) {
+    return arv->esq;
 }
 
-void criaDicionario(char** dic, Arv* arv, char* codigo, int altura) {
-    char esq[altura]; //Tamanho máximo do código = altura da árvore
-    char dir[altura];
-    
-    if (arv->esq == NULL && arv->dir == NULL) {
-        if (arv->eof == 1) {
-            strcpy(dic[256],codigo);
-        } else {
-            strcpy(dic[arv->caracter],codigo);
-        }
-    } else {
-        strcpy(esq,codigo);
-        strcpy(dir,codigo);
-        strcat(esq,"0");
-        strcat(dir,"1");
-
-        criaDicionario(dic,arv->esq,esq,altura);
-        criaDicionario(dic,arv->dir,dir,altura);
-    }
+Arv* retornaArvDir(Arv* arv) {
+    return arv->dir;
 }
 
-void imprimeDicionario(char** dic) {
-    for (int i = 0; i < TAM; i++) {
-        //if (*dic[i] != '\0') {
-            printf("%d - %s\n",i,dic[i]);
-        //}
-    }
+unsigned char retornaArvCaracter(Arv* arv) {
+    return arv->caracter;
 }
 
-void liberaDicionario(char** dic) {
-    for (int i = 0; i < TAM; i++) {
-        free(dic[i]);
-        dic[i] = NULL;
-    }
-    free(dic);
-    dic = NULL;
+int retornaArvEOF(Arv* arv) {
+    return arv->eof;
 }
 
-/* Verifica se o bitmap está com tamanho cheio
- * Input: Ponteiro para o bitmap
- * Output: Booleano: 1 se estiver cheio, 0 se estiver vazio
- * Pré-condição: O bitmap existe e está corretamente alocado
- * Pós-condição: Nenhum
- */
-static int verificaTamanho(bitmap* bm) {
-    if (bitmapGetLength(bm) == bitmapGetMaxSize(bm)) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-/* Escreve todo o bitmap em um arquivo e realoca a sua memória
- * Input: Ponteiro para o arquivo a ser escrito e ponteiro para o bitmap
- * Output: Ponteiro para o bitmap realocado
- * Pré-condição: O bitmap e o arquivo existem e estão corretamente alocados
- * Pós-condição: A memória do bitmap é realocada, e o arquivo permanece aberto
- */
-static bitmap* recriaBitmap(FILE* destino, bitmap* bm) {
-        for (int i = 0; i < bitmapGetLength(bm)/8; i++) {
-            fwrite(&bitmapGetContents(bm)[i],sizeof(unsigned char),1,destino);
-        }
-        bitmapLibera(bm);
-        bm = bitmapInit(80000000);
-        printf("Bitmap recriado\n");
-        return bm;
-}
-
-/* Escreve um bit em um arquivo
- * Input: Ponteiro para o arquivo, para o bitmap e um bit
- * Output: Nenhum
- * Pré-condição: O arquivo e o bitmap existem e estão corretamente alocados, e o bit é válido
- * Pós-condição: Nenhum
- */
-static void escreve(FILE* destino,bitmap* bm, unsigned char bit) {
-    if (verificaTamanho(bm) == 1) {
-        bm = recriaBitmap(destino,bm);
-    } else if (bit == 1) {
-        bitmapAppendLeastSignificantBit(bm,1);
-        if (verificaTamanho(bm) == 1) {
-            bm = recriaBitmap(destino,bm);
-        }
-    } else {
-        bitmapAppendLeastSignificantBit(bm,0);
-        if (verificaTamanho(bm) == 1) {
-            bm = recriaBitmap(destino,bm);
-        }
-    }
-}
-
-void compacta(char** dicionario, FILE* origem, char* filename, int* tabela) {
-    char temp[100];
-    char nome[100];
-    unsigned char ext[10];
-    strcpy(temp,filename);
-    char* pt = strtok(temp,".");
-    strcpy(nome,pt);
-    pt = strtok(NULL,".");
-    strcpy(ext,pt);
-    strcat(nome,".comp");
-    int k = (int)strlen(ext);
-
-    FILE* comp = fopen(nome,"wb");
-    if (comp == NULL) {
-        perror("Erro");
-    }
-    fwrite(&k,sizeof(int),1,comp);
-    fwrite(&ext,sizeof(char),k,comp);
-    escreveTabelaFrequencia(comp,tabela);
-
-    fseek(origem,0,SEEK_SET);
-    fseek(origem,0,SEEK_END);
-    unsigned long filelen = ftell(origem);
-    fseek(origem,0,SEEK_SET);
-    unsigned char* buffer = (char*) malloc(filelen);
-
-    fread(buffer,filelen,sizeof(unsigned char),origem);
-
-    char codigo[100];
-    strcpy(codigo,"");
-
-    int i = 0;
-    int j = 0;
-
-    bitmap* bm = bitmapInit(80000000); //8kk bits == 1MB
-
-    while (i < filelen) {
-        j = 0;
-        strcpy(codigo,dicionario[(unsigned char)buffer[i]]);
-        while (codigo[j] != '\0') {
-            if (codigo[j] == '1') {
-                escreve(comp,bm,1);
-            } else if (codigo[j] == '0') {
-                escreve(comp,bm,0);
-            }
-            j++;
-        }
-        i++;
-    }
-
-    int n;
-    j = 0;
-    while (dicionario[256][j] != '\0') {
-        if (dicionario[256][j] == '1') {
-            escreve(comp,bm,1);
-        } else if (dicionario[256][j] == '0') {
-            escreve(comp,bm,0);
-        }
-        j++;
-    }
-
-    if (bitmapGetLength(bm) % 8 != 0) {
-        n = 8 - (bitmapGetLength(bm) % 8);
-        for (i = 0 ; i < n; i++) {
-            bitmapAppendLeastSignificantBit(bm,0);
-        }        
-    }
-    
-    for (i = 0; i < bitmapGetLength(bm)/8; i++) {
-        fwrite(&bitmapGetContents(bm)[i],sizeof(unsigned char),1,comp);
-    }
-    
-    free(buffer);
-    bitmapLibera(bm);
-    fclose(comp);
-}
-
-static unsigned int verificaBitUm(unsigned char byte, int i) {
-    unsigned char mascara = (1 << i);
-    return byte & mascara;
-}
-
-void descompacta(FILE* arquivo, Arv* huffman, char* filename, char* extensao) {
-    unsigned char c;
-    Arv* no = huffman;
-    char temp[100];
-    char nome[100];
-    strcpy(temp,filename);
-    strtok(temp,".");
-    strcpy(nome,temp);
-    strcat(nome,".");
-    strcat(nome,extensao);
-    FILE* novo = fopen(nome,"wb");
-    if (novo == NULL) {
-        perror("Erro");
-    }
-
-    while (fread(&c,sizeof(unsigned char),1,arquivo)) {
-        for (int i = 7; i >= 0; i--) {
-            if (verificaBitUm(c,i)) {
-                no = no->dir;
-            } else {
-                no = no->esq;
-            }
-
-            if (no->esq == NULL && no->dir == NULL) {
-                if (no->eof == 1) {
-                    fclose(novo);
-                    return;
-                }
-                
-                fwrite(&no->caracter,sizeof(unsigned char),1,novo);
-                no = huffman;
-            }
-        }
-    }
-    fclose(novo);
+int retornaArvFreq(Arv* arv) {
+    return arv->frequencia;
 }
