@@ -10,7 +10,7 @@
  * Input: Ponteiro para o bitmap
  * Output: Booleano: 1 se estiver cheio, 0 se estiver vazio
  * Pré-condição: O bitmap existe e está corretamente alocado
- * Pós-condição: Nenhum
+ * Pós-condição: O bitmap permanece inalterado
  */
 static int verificaTamanho(bitmap* bm) {
     if (bitmapGetLength(bm) == bitmapGetMaxSize(bm)) {
@@ -36,11 +36,11 @@ static bitmap* recriaBitmap(FILE* destino, bitmap* bm) {
         return bm;
 }
 
-/* Escreve um bit em um arquivo
+/* Adiciona um bit em um bitmap e escreve no arquivo caso o bitmap esteja cheio
  * Input: Ponteiro para o arquivo, para o bitmap e um bit
  * Output: Nenhum
  * Pré-condição: O arquivo e o bitmap existem e estão corretamente alocados, e o bit é válido
- * Pós-condição: Nenhum
+ * Pós-condição: O arquivo permanece aberto, e o bitmap continua existindo
  */
 static void escreve(FILE* destino,bitmap* bm, unsigned char bit) {
     if (verificaTamanho(bm) == 1) { // Verifica se o bitmap está cheio
